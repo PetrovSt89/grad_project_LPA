@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="weather">
+    <h2 style="font-size:30px;">{{ page_title }}</h2>
+    <br>
+    {% if weather %}
+        <h3>температура {{ weather.temp }} 
+        <br>ощущается как {{ weather.feels_like }}</h3>
+    {% else %}
+        <h3>Сервис погоды временно не доступен!</h3>
+    {% endif %}
+</div>
+<div class="news">
+    <h2 style="font-size:30px;">Новости</h2>
+    <br>
+    {% if news_list %}
+        {% for news in news_list %}
+        <h3><a href="{{ url_for('news.single_news', news_id=news.id) }}">{{ news.title }}</a></h3>
+        <p>{{ news.published.strftime('%d.%m.%Y') }} | Комментарии: {{ news.comments_count() }}</p>
+        <br>
+        {% endfor %}
+    {% else %}
+        <h3>Сервис новостей временно не доступен!</h3>
+    {% endif %}
+</div> 
+{% endblock %}
