@@ -1,30 +1,11 @@
-from sqlalchemy import Table, Column, Integer, String, ForeignKey, Boolean, MetaData
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, JSON
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from src.db import Base
 
-metadata = MetaData()
+from src.db import db_session
 
-
-roles = Table(
-    'roles',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('name', String, nullable=False),
-)
-    
-user = Table(
-    'users',
-    metadata,
-    Column('id', Integer, primary_key=True),
-    Column('email', String, nullable=False),
-    Column('username', String, nullable=False),
-    Column('hashed_password', String, nullable=False),
-    Column('role_id', Integer, ForeignKey(roles.c.id)),
-    Column('is_active', Boolean, default=True),
-    Column('is_superuser', Boolean, default=False),
-    Column('is_verified', Boolean, default=False),
-)
-
+Base = declarative_base()
+Base.query = db_session.query_property()
 
 class Role(Base):
     __tablename__ = 'roles'
@@ -44,6 +25,7 @@ class User(Base):
     is_verified = Column(Boolean)
 
     tokens = relationship('Token', back_populates='user')
+    box = relationship('Box', back_populates='creator')
 
 class Token(Base):
     __tablename__ = 'tokens'
@@ -52,3 +34,13 @@ class Token(Base):
     user_id = Column(Integer, ForeignKey(User.id))
 
     user = relationship('User', back_populates='tokens')
+
+
+class Box(Base):
+    __tablename__ = 'boxes'
+    id = Column(Integer, primary_key=True)
+    boxname = Column(String, nullable=False)
+    list_participants = Column(JSON)
+    creator_id = Column(Integer, ForeignKey(User.id))
+
+    creator = relationship('User', back_populates='box')

@@ -1,25 +1,26 @@
-from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import Depends, FastAPI
+from src.auth.crud import get_user_by_token
 
 from src.auth.router import router as auth_router
+from src.box.router import router as box_router
+
+from typing import Annotated
 
 
 app = FastAPI(
     title='Project App'
 )
 
-app.mount("/static", StaticFiles(directory="src/static"), name="static")
-
-templates = Jinja2Templates(directory='src/templates')
-
 
 @app.get('/')
-def index(request: Request):
+def index():
     page_title = 'Нечто'
-    return templates.TemplateResponse(name='base.html',
-                                      request=request,
-                                      context={"page_title": page_title})
+    current_user = None
+    return {
+        "page_title": page_title,
+        "current_user": current_user
+        }
 
 
 app.include_router(auth_router)
+app.include_router(box_router)
