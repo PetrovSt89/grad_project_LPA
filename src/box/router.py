@@ -3,7 +3,8 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 
 from src.box.schemas import BoxCreate, BoxRead
-from src.box.crud import get_boxes, get_box_by_name, create_box, update_box, delete_box
+from src.box.crud import get_boxes, get_box_by_name, create_box, update_box, delete_box, get_rand_list
+from src.user_in_box.crud import get_useers_in_box
 from src.auth.router import get_user_by_token
 from src.auth.secure import apikey_scheme
 
@@ -15,7 +16,7 @@ router = APIRouter(
 
 
 @router.get('/')
-def read_boxes(
+def read_boxes_by_creator(
         access_token: Annotated[str, Depends(apikey_scheme)],
         skip: int = 0,
         limit: int = 100,
@@ -24,10 +25,11 @@ def read_boxes(
     boxes = get_boxes(user=user, skip=skip, limit=limit)
     return [{
         'id': box.id,
-        'username': box.boxname,
-        'email': box.list_participants,
-        'role_id': box.creator_id,
+        'boxname': box.boxname,
+        'list_participants': get_useers_in_box(user=user, boxname=box.boxname),
+        'creator_id': {'username': box.creator.username, 'id': box.creator.id},
              } for box in boxes]
+
 
 
 @router.get('/{boxname}')
@@ -39,10 +41,20 @@ def read_box_by_boxname(
     box: BoxRead = get_box_by_name(user=user, boxname=boxname)
     return {
         'id': box.id,
-        'username': box.boxname,
-        'email': box.list_participants,
-        'role_id': box.creator_id,
+        'boxname': box.boxname,
+        'list_participants': get_useers_in_box(user=user, boxname=box.boxname),
+        'creator_id': {'username': box.creator.username, 'id': box.creator.id},
              }
+
+
+@router.get('/list/{boxname}')
+def get_random_list(
+        access_token: Annotated[str, Depends(apikey_scheme)],
+        boxname: str
+        ):
+    user = get_user_by_token(access_token=access_token)
+    random_dict = get_rand_list(user=user, boxname=boxname)
+    return {'result': random_dict}
 
 
 @router.post('/')

@@ -1,10 +1,11 @@
 from sqlalchemy import select
 
 from src.db import db_session
-from src.models import Box
+from src.models import Box, UserBox, User
 from src.auth.schemas import UserRead
 from src.box.schemas import BoxCreate
 from src.box.errors import HTTPExceptionBox
+from src.box.utils import test_random, create_json_dependence
 
 
 def get_boxes(user: UserRead, skip: int = 0, limit: int = 100):
@@ -25,6 +26,26 @@ def get_box_by_name(user: UserRead, boxname: str):
             detail='Вы не создавали такую коробку'
         )
     return box
+
+
+def get_rand_list(user: UserRead, boxname: str):
+    box = Box.query.filter(Box.boxname == boxname).first()
+    if not box:
+        raise HTTPExceptionBox(
+            status_code=400,
+            detail='Такoй коробки нет'
+        )
+    if box.creator_id != user.id:
+        raise HTTPExceptionBox(
+            status_code=400,
+            detail='Вы не создавали такую коробку'
+        )
+    box_list = UserBox.query.filter(UserBox.box_id == box.id).all()
+    users = [User.query.filter(User.id == userbox.user_id).first() for userbox in box_list]
+    
+    dependence = test_random(users)
+    create_json_dependence(filename=f'{box.boxname}', person_dict=dependence)
+    return dependence
 
 
 def create_box(box: BoxCreate, user: UserRead):
@@ -63,4 +84,3 @@ def delete_box(user: UserRead, boxname: str):
         )
     db_session.delete(box)
     db_session.commit()
-

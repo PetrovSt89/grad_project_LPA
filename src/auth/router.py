@@ -17,12 +17,13 @@ router = APIRouter(
 @router.post('/process-reg', status_code=201)
 def process_reg_rest(user_data: UserCreate):
     reg_user_rest(user_data=user_data)
+    return {'message': 'ок'}
 
 
 @router.post('/token', status_code=201)
 def create_token(user_data: UserAuth):
     cr_token(user_data=user_data)
-
+    return {'message': 'ок'}
 
 @router.get('/self')
 def get_user(access_token: Annotated[str, Depends(apikey_scheme)]):

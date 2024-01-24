@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -26,6 +26,7 @@ class User(Base):
 
     tokens = relationship('Token', back_populates='user')
     box = relationship('Box', back_populates='creator')
+    userboxs = relationship('UserBox', back_populates='user')
 
 class Token(Base):
     __tablename__ = 'tokens'
@@ -40,7 +41,18 @@ class Box(Base):
     __tablename__ = 'boxes'
     id = Column(Integer, primary_key=True)
     boxname = Column(String, nullable=False)
-    list_participants = Column(JSON)
     creator_id = Column(Integer, ForeignKey(User.id))
 
     creator = relationship('User', back_populates='box')
+    userboxs = relationship('UserBox', back_populates='box')
+
+
+class UserBox(Base):
+    __tablename__ = 'user_boxes'
+    id = Column(Integer, primary_key=True)
+    box_id = Column(Integer, ForeignKey(Box.id))
+    user_id = Column(Integer, ForeignKey(User.id))
+    wishes = Column(Text)
+
+    user = relationship('User', back_populates='userboxs')
+    box = relationship('Box', back_populates='userboxs')
