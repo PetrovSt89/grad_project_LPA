@@ -15,15 +15,16 @@ router = APIRouter(
 
 
 @router.post('/process-reg', status_code=201)
-def process_reg(user_data: UserCreate) -> Dict[str, str]:
-    reg_user(user_data=user_data)
+def process_reg(user: UserAuth) -> Dict[str, str]:
+    reg_user(user_data=user)
     return {'message': 'ок'}
 
 
 @router.post('/token', status_code=201)
-def create_token(user_data: UserAuth) -> Dict[str, str]:
-    cr_token(user_data=user_data)
+def create_token(user: UserCreate) -> Dict[str, str]:
+    cr_token(user=user)
     return {'message': 'ок'}
+
 
 @router.get('/self')
 def get_user(access_token: Annotated[str, Depends(apikey_scheme)]):

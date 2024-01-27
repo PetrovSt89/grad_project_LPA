@@ -24,8 +24,15 @@ def test_random(users: List[User]) -> Dict[str, str]:
         recipient = random.choice(user_res)
         if result_dict.get(recipient.username) == presenter.username:
             continue
+        
         if recipient == presenter:
             continue
+
+        if len(user_pres) == 1 and len(user_res) == 1 and user_res == user_pres:
+            val = result_dict.popitem()
+            result_dict[val[0]] = user_pres[0]
+            result_dict[user_res[0]] = val[1]     
+
         result_dict[presenter.username] = recipient.username
         user_pres.remove(presenter)
         user_res.remove(recipient)

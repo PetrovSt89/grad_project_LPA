@@ -60,6 +60,16 @@ def read_user_recipient(
     return {'recipient': recipient}
 
 
+@router.delete('/{boxname}')
+def del_reg_user(
+        access_token: Annotated[str, Depends(apikey_scheme)],
+        boxname: str,
+        ) -> Dict[str, str]:
+    user = get_user_by_token(access_token=access_token)
+    delete_users_in_box(user=user, boxname=boxname)
+    return {'message': 'ок'}
+
+
 @router.delete('/{boxname}/{username}')
 def del_users_by_creator(
         access_token: Annotated[str, Depends(apikey_scheme)],
@@ -71,11 +81,4 @@ def del_users_by_creator(
     return {'message': 'ок'}
 
 
-@router.delete('/{boxname}')
-def del_reg_user(
-        access_token: Annotated[str, Depends(apikey_scheme)],
-        boxname: str,
-        ) -> Dict[str, str]:
-    user = get_user_by_token(access_token=access_token)
-    delete_users_in_box(user=user, boxname=boxname)
-    return {'message': 'ок'}
+

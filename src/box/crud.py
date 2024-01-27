@@ -1,5 +1,3 @@
-from sqlalchemy import select
-from fastapi import HTTPException
 from typing import List, Dict
 
 from src.db import db_session
@@ -7,6 +5,7 @@ from src.models import Box, UserBox, User
 from src.auth.schemas import UserRead
 from src.box.schemas import BoxCreate, BoxRead
 from src.box.utils import test_random, create_json_dependence
+from src.box.dependencies import box_by_name, check_creator
 
 
 def get_boxes(user: UserRead, skip: int = 0, limit: int = 100) -> List[Box]:
@@ -15,33 +14,14 @@ def get_boxes(user: UserRead, skip: int = 0, limit: int = 100) -> List[Box]:
 
 
 def get_box_by_name(user: UserRead, boxname: str) -> BoxRead:
-    box = Box.query.filter(Box.boxname == boxname).first()
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такoй коробки нет'
-        )
-    if box.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='Вы не создавали такую коробку'
-        )
+    box = box_by_name(boxname=boxname)
+    check_creator(box=box, user=user)
     return box
 
 
 def cr_rand_list(user: UserRead, boxname: str) -> Dict[str, str]:
-    box = Box.query.filter(Box.boxname == boxname).first()
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такoй коробки нет'
-        )
-    # тут бы сделать редирект на регистрацию в коробку
-    if box.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='Вы не создавали такую коробку'
-        )
+    box = box_by_name(boxname=boxname)
+    check_creator(box=box, user=user)
     box_list = UserBox.query.filter(UserBox.box_id == box.id).all()
     users = [User.query.filter(User.id == userbox.user_id).first() for userbox in box_list]
     
@@ -57,32 +37,14 @@ def create_box(box: BoxCreate, user: UserRead) -> None:
 
 
 def update_box(user: UserRead, box: BoxCreate, new_boxname: str) -> None:
-    box = db_session.scalar(select(Box).where(Box.boxname == box.boxname))
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    if box.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='изменять коробку может только создатель'
-        )
+    box = box_by_name(boxname=box.boxname)
+    check_creator(box=box, user=user)
     box.boxname = new_boxname
     db_session.commit()
 
 
 def delete_box(user: UserRead, boxname: str) -> None:
-    box = db_session.scalar(select(Box).where(Box.boxname == boxname))
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    if box.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='удалять коробку может только создатель'
-        )
+    box = box_by_name(boxname=boxname)
+    check_creator(box=box, user=user)
     db_session.delete(box)
     db_session.commit()

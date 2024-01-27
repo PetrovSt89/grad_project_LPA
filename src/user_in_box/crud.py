@@ -1,28 +1,21 @@
-from fastapi import HTTPException
 from typing import List, Tuple
 
 from src.db import db_session
 from src.models import Box, UserBox, User
 from src.auth.schemas import UserRead
+from src.auth.dependencies import user_by_username, check_not_user
 from src.box.schemas import BoxCreate, BoxRead
 from src.box.utils import read_json_dependence
 from src.box.crud import get_boxes, get_box_by_name
+from src.box.dependencies import box_by_name, check_creator
+from src.user_in_box.dependencies import userbox_by_user_by_box, check_userbox,\
+check_not_userbox, check_box_dependence
 
 
 def reg_useer_in_box(box: BoxCreate, user: UserRead, wishes: str) -> None:
-    box = Box.query.filter(Box.boxname == box.boxname).first()
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    is_user_in_box = UserBox.query.filter(
-        UserBox.user_id == user.id).filter(UserBox.box_id == box.id).first()
-    if is_user_in_box:
-        raise HTTPException(
-            status_code=400,
-            detail='Пользователь уже зарегистрирован'
-        )
+    box = box_by_name(boxname=box.boxname)
+    userbox = userbox_by_user_by_box(user=user, box=box)
+    check_userbox(userbox=userbox)
     new_user_box = UserBox(box_id=box.id, user_id=user.id, wishes=wishes)
     db_session.add(new_user_box)
     db_session.commit()
@@ -34,30 +27,15 @@ def reg_useer_by_creator(
         username: str,
         wishes: str
         ) -> None:
-    box = Box.query.filter(Box.boxname == box.boxname).first()
-    if not box:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    if box.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='Вы не создатель этой таблицы'
-        )
-    reg_user = User.query.filter(User.username == username).first()
-    if not reg_user:
-        raise HTTPException(
-            status_code=400,
-            detail='Такого пользователя нет'
-        )
-    is_user_in_box = UserBox.query.filter(
-        UserBox.user_id == reg_user.id).filter(UserBox.box_id == box.id).first()
-    if is_user_in_box:
-        raise HTTPException(
-            status_code=400,
-            detail='Пользователь уже зарегистрирован'
-        )
+    box = box_by_name(boxname=box.boxname)
+    check_creator(box=box, user=user)
+    
+    reg_user = user_by_username(username)
+
+    check_not_user(user=reg_user)
+
+    userbox = userbox_by_user_by_box(user=reg_user, box=box)
+    check_userbox(userbox=userbox)
     new_user_box = UserBox(box_id=box.id, user_id=reg_user.id, wishes=wishes)
     db_session.add(new_user_box)
     db_session.commit()
@@ -67,22 +45,12 @@ def get_useers_in_box(
         boxname: str
         ) -> List[Tuple[UserRead, str]]:
     
-    box_input = Box.query.filter(Box.boxname == boxname).first()
-
-    if not box_input:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
+    box_input = box_by_name(boxname=boxname)    
     userbox_models = UserBox.query.filter(
         UserBox.box_id == box_input.id
         ).all()
-    list_user_wishes = []
-    for model in userbox_models:
-        list_user_wishes.append(
-            (User.query.filter(User.id == model.user_id).first(),
-             model.wishes)
-             )
+    list_user_wishes = [(User.query.filter(User.id == model.user_id).first(),
+             model.wishes) for model in userbox_models]
 
     return list_user_wishes
 
@@ -119,60 +87,35 @@ def get_box_with_wishes(
 
 
 def get_user_recipient(user: UserRead, boxname: str) -> str:
-    box_input = Box.query.filter(Box.boxname == boxname).first()
-    if not box_input:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
+    box_input = box_by_name(boxname=boxname)
     box_dependence = read_json_dependence(filename=box_input.boxname)
     return box_dependence[user.username]
 
 
 def delete_users_in_box(user: UserRead, boxname: str) -> None:
-    box_input = Box.query.filter(Box.boxname == boxname).first()
-    if not box_input:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    userbox = UserBox.query.filter(
-        UserBox.user_id == user.id
-        ).filter(UserBox.box_id == box_input.id).first()
-    if not userbox:
-        raise HTTPException(
-            status_code=400,
-            detail='Вы не зарегистрированы в коробку'
-        )
+    box_input = box_by_name(boxname=boxname)
+    userbox = userbox_by_user_by_box(user=user, box=box_input)
+    
+    check_not_userbox(userbox=userbox)
+
+    check_box_dependence(box=box_input, user=user)
+
     db_session.delete(userbox)
     db_session.commit()
 
 
 def delete_users_by_creator(user: UserRead, boxname: str, username: str) -> None:
-    box_input = Box.query.filter(Box.boxname == boxname).first()
-    if not box_input:
-        raise HTTPException(
-            status_code=400,
-            detail='Такой коробки нет'
-        )
-    if box_input.creator_id != user.id:
-        raise HTTPException(
-            status_code=400,
-            detail='Вы не создатель этой таблицы'
-        )
-    del_user = User.query.filter(User.username == username).first()
-    if not del_user:
-        raise HTTPException(
-            status_code=400,
-            detail='Такого пользователя нет'
-        )
-    userbox = UserBox.query.filter(
-        UserBox.user_id == del_user.id
-        ).filter(UserBox.box_id == box_input.id).first()
-    if not userbox:
-        raise HTTPException(
-            status_code=400,
-            detail='Пользователь не зарегистрирован в коробку'
-        )
+    box_input = box_by_name(boxname=boxname)
+    check_creator(box=box_input, user=user)
+    
+    del_user = user_by_username(username)
+    
+    check_not_user(user=del_user)
+    
+    check_box_dependence(box=box_input, user=del_user)
+
+    userbox = userbox_by_user_by_box(user=del_user, box=box_input)
+    
+    check_not_userbox(userbox=userbox)
     db_session.delete(userbox)
     db_session.commit()    

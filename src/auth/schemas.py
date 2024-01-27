@@ -20,11 +20,6 @@ class Role(RoleBase):
     id: int
 
 
-class UserAuth(TunedModel):
-    username: Annotated[str, Path(ge=1, lt=40)]
-    password: Annotated[str, Path(ge=1, lt=40)]
-
-
 class UserBase(TunedModel):
     pass
     
@@ -33,10 +28,17 @@ class Creator(UserBase):
     username: str
     id: int
 
-class UserCreate(UserBase):
-    password: Annotated[str, Path(ge=1, lt=40)]
-    username: Annotated[str, Path(ge=1, lt=40)]
 
+class UserAuth(UserBase):
+    username: str
+    password: str
+    email: EmailStr
+
+
+class UserCreate(UserBase):
+    username: str
+    password: str
+    
 
 class UserRead(UserBase):
     id: int

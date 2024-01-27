@@ -7,11 +7,12 @@ from starlette.status import HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
 
 from src.db import db_session
 from src.models import User, Token
-from src.auth.schemas import UserCreate
+from src.auth.schemas import UserAuth
 from src.auth.secure import apikey_scheme, Hasher
 
 
-def reg_user(user_data: UserCreate) -> None:
+def reg_user(user_data: UserAuth) -> None:
+    
     if db_session.scalar(select(User).where(User.username == user_data.username)):
         raise HTTPException(
             status_code=HTTP_400_BAD_REQUEST,
