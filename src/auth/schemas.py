@@ -1,12 +1,11 @@
-from pydantic import BaseModel, EmailStr, validator
-from fastapi import HTTPException
+from pydantic import BaseModel, EmailStr, ConfigDict
+from fastapi import Path
+
+from typing import Annotated
 
 
 class TunedModel(BaseModel):
-    class Config:
-        from_attributes = True
-
-    # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RoleBase(TunedModel):
@@ -22,34 +21,32 @@ class Role(RoleBase):
 
 
 class UserAuth(TunedModel):
-    username: str
-    password: str
+    username: Annotated[str, Path(ge=1, lt=40)]
+    password: Annotated[str, Path(ge=1, lt=40)]
 
 
 class UserBase(TunedModel):
-    email: EmailStr
-    username: str
+    pass
+    
 
+class Creator(UserBase):
+    username: str
+    id: int
 
 class UserCreate(UserBase):
-    password: str
-
-    @validator('username')
-    def validate_username(cls, value):
-        if not value:
-            raise HTTPException(
-                status_code=422, detail='Это имя не подходит'
-            )
-        return value
+    password: Annotated[str, Path(ge=1, lt=40)]
+    username: Annotated[str, Path(ge=1, lt=40)]
 
 
 class UserRead(UserBase):
     id: int
-    role_id: Role
+    username: str
+    email: EmailStr
+    role_id: int
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
 
 
 class Token(TunedModel):
-    access_token: str
+    access_token: Annotated[str, Path(ge=1, lt=40)]

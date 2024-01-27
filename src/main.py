@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from typing import Dict
 
 from src.auth.router import router as auth_router
 from src.admin.router import router as admin_router
@@ -12,12 +13,10 @@ app = FastAPI(
 
 
 @app.get('/')
-def index():
-    page_title = 'Нечто'
-    current_user = None
+def index() -> Dict[str, str]:
+    page_title = 'Случайный дарильщик'
     return {
         "page_title": page_title,
-        "current_user": current_user
         }
 
 

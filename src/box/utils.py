@@ -1,11 +1,11 @@
 import json
 import random
 
-from typing import List
+from typing import List, Dict
 
 from src.models import User
 
-def test_random(users: List[User]) -> dict[str, str]:
+def test_random(users: List[User]) -> Dict[str, str]:
     if len(users) < 2:
         return {
             users[0].username: users[0].username
@@ -32,12 +32,12 @@ def test_random(users: List[User]) -> dict[str, str]:
     return result_dict
 
 
-def create_json_dependence(filename: str, person_dict: dict[str, str]):
+def create_json_dependence(filename: str, person_dict: dict[str, str]) -> None:
     with open(f'{filename}.json', 'w') as json_file:
         json.dump(person_dict, json_file)
 
 
-def read_json_dependence(filename: str):
+def read_json_dependence(filename: str) -> Dict[str, str]:
     with open(f'{filename}.json', 'r') as f:
         data = json.load(f)
         return data

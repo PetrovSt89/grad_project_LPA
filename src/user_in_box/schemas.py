@@ -1,25 +1,13 @@
-from pydantic import BaseModel
-from fastapi import HTTPException
-from typing import List
+from pydantic import BaseModel, ConfigDict
 
 
 class TunedModel(BaseModel):
-    class Config:
-        from_attributes = True
-
-    # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
-class BoxBase(TunedModel):
-    boxname: str
-
-
-class BoxCreate(BoxBase):
+class UserBoxBase(TunedModel):
     pass
 
 
-class BoxRead(BoxBase):
-    id: int
-    creator_id: int
-    list_participants: List
-
+class UserBox(UserBoxBase):
+    recipient: str

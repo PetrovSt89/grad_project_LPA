@@ -6,11 +6,10 @@ from starlette.status import HTTP_404_NOT_FOUND
 from src.auth.schemas import UserCreate
 from src.models import Token, User
 from src.auth.secure import Hasher
-from src.auth.errors import HTTPExceptionPass, HTTPExceptionRepToken
 from src.db import db_session
 
 
-def cr_token(user_data: UserCreate):
+def cr_token(user_data: UserCreate) -> None:
     user: User = db_session.scalar(select(User).where(User.username == user_data.username))
     if not user:
         raise HTTPException(
@@ -18,10 +17,10 @@ def cr_token(user_data: UserCreate):
             detail='Пользователь не найден'
         )
     if not Hasher.verify_password(user_data.password, user.hashed_password):
-        raise HTTPExceptionPass(status_code=400, detail='Неверный пароль')
+        raise HTTPException(status_code=400, detail='Неверный пароль')
 
     if user.tokens:
-        raise HTTPExceptionRepToken(
+        raise HTTPException(
             status_code=400, detail='Токен для этого пользователя уже создан')
     
     token: Token = Token(user_id=user.id, access_token=str(uuid.uuid4()))

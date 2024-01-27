@@ -28,6 +28,7 @@ class User(Base):
     box = relationship('Box', back_populates='creator')
     userboxs = relationship('UserBox', back_populates='user')
 
+
 class Token(Base):
     __tablename__ = 'tokens'
     id = Column(Integer, primary_key=True)

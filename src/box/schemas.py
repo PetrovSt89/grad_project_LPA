@@ -1,13 +1,12 @@
-from pydantic import BaseModel
-from fastapi import HTTPException
-from typing import List
+from pydantic import BaseModel, ConfigDict
+from typing import List, Tuple
+from fastapi import Path
+
+from src.auth.schemas import UserRead, Creator
 
 
 class TunedModel(BaseModel):
-    class Config:
-        from_attributes = True
-
-    # model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class BoxBase(TunedModel):
@@ -20,6 +19,5 @@ class BoxCreate(BoxBase):
 
 class BoxRead(BoxBase):
     id: int
-    creator_id: int
-    list_participants: List
-
+    creator: Creator
+    list_participants: List[Tuple[UserRead, str]] | None
