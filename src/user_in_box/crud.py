@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from src.db import db_session
 from src.models import UserBox, User
 from src.auth.schemas import UserRead
@@ -42,7 +40,7 @@ def reg_useer_by_creator(
 
 def get_useers_in_box(
         boxname: str
-        ) -> list[Tuple[UserRead, str]] | None:
+        ) -> list[tuple[UserRead, str]] | None:
     
     box_input = box_by_name(boxname=boxname)    
     userbox_models = UserBox.query.filter(

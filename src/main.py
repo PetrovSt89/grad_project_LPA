@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from typing import Dict
 
 from src.auth.router import router as auth_router
 from src.admin.router import router as admin_router
 from src.box.router import router as box_router
 from src.user_in_box.router import router as userbox_router
+
+from src.schemas import Default
 
 
 app = FastAPI(
@@ -13,11 +14,9 @@ app = FastAPI(
 
 
 @app.get('/')
-def index() -> Dict[str, str]:
+def index() -> Default:
     page_title = 'Случайный дарильщик'
-    return {
-        "page_title": page_title,
-        }
+    return Default(page_title=page_title)
 
 
 app.include_router(auth_router)

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from typing import Annotated, Dict
+from typing import Annotated
 
-from src.auth.schemas import UserCreate, UserAuth
+from src.auth.schemas import UserCreate, UserAuth, ResponseOk
 from src.auth.crud import reg_user, get_user_by_token
 from src.auth.secure import apikey_scheme
 from src.auth.tokens import create_new_token
@@ -15,15 +15,15 @@ router = APIRouter(
 
 
 @router.post('/process-reg', status_code=201)
-def process_reg(user: UserAuth) -> Dict[str, str]:
+def process_reg(user: UserAuth) -> ResponseOk:
     reg_user(user_data=user)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.post('/token', status_code=201)
-def create_token(user: UserCreate) -> Dict[str, str]:
+def create_token(user: UserCreate) -> ResponseOk:
     create_new_token(user=user)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.get('/self')

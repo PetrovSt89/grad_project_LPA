@@ -1,5 +1,3 @@
-from typing import Dict
-
 from src.db import db_session
 from src.models import Box, UserBox, User, RandPresenter
 from src.auth.schemas import UserRead
@@ -19,7 +17,7 @@ def get_box_by_name(user: UserRead, boxname: str) -> BoxRead | None:
     return box
 
 
-def cr_rand_dict(user: UserRead, boxname: str) -> Dict[str, str]:
+def cr_rand_dict(user: UserRead, boxname: str) -> dict[str, str]:
     box = box_by_name(boxname=boxname)
     check_creator(box=box, user=user)
     box_list = UserBox.query.filter(UserBox.box_id == box.id).all()

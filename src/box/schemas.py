@@ -1,5 +1,4 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Tuple
 
 from src.auth.schemas import UserRead, Creator
 
@@ -19,4 +18,5 @@ class BoxCreate(BoxBase):
 class BoxRead(BoxBase):
     id: int
     creator: Creator
-    list_participants: list[Tuple[UserRead, str]] | None
+    list_participants: list[tuple[UserRead, str]] | None
+

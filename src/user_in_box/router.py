@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from typing import Annotated, Dict
+from typing import Annotated
 
+from src.auth.schemas import ResponseOk
 from src.box.schemas import BoxCreate, BoxRead
 from src.user_in_box.schemas import UserBox
 from src.user_in_box.crud import reg_useer_in_box, reg_useer_by_creator, get_box_with_wishes,\
@@ -21,10 +22,10 @@ def reg_in_box(
         access_token: Annotated[str, Depends(apikey_scheme)],
         box: BoxCreate,
         wishes: str
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     reg_useer_in_box(user=user, box=box, wishes= wishes)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.post('/{username}/{wishes}')
@@ -33,10 +34,10 @@ def reg_users_by_creator(
         box: BoxCreate,
         username: str,
         wishes: str
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     reg_useer_by_creator(user=user, box=box, username=username, wishes=wishes)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.get('/{boxname}', response_model = BoxRead)
@@ -57,17 +58,17 @@ def read_user_recipient(
           ) -> UserBox | None:
     user = get_user_by_token(access_token=access_token)
     recipient = get_user_recipient(user=user, boxname=boxname)
-    return {'recipient': recipient}
+    return UserBox(recipient=recipient)
 
 
 @router.delete('/{boxname}')
 def del_reg_user(
         access_token: Annotated[str, Depends(apikey_scheme)],
         boxname: str,
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     delete_users_in_box(user=user, boxname=boxname)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.delete('/{boxname}/{username}')
@@ -75,9 +76,9 @@ def del_users_by_creator(
         access_token: Annotated[str, Depends(apikey_scheme)],
         boxname: str,
         username: str
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     delete_users_by_creator(user=user, boxname=boxname, username=username)
-    return {'message': 'ок'}
+    return ResponseOk
 
 

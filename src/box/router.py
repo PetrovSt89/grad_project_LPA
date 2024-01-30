@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from typing import Annotated, Dict
+from typing import Annotated
 
+from src.auth.schemas import ResponseOk
 from src.box.schemas import BoxCreate, BoxRead
 from src.box.crud import create_box, update_box, delete_box, cr_rand_dict
 from src.user_in_box.crud import get_list_boxes_with_wishes, get_box_with_wishes
@@ -44,7 +45,7 @@ def read_box_by_boxname(
 def create_random_dict(
         access_token: Annotated[str, Depends(apikey_scheme)],
         boxname: str
-        ) -> Dict[str, str]:
+        ) -> dict[str, str]:
     user = get_user_by_token(access_token=access_token)
     random_dict = cr_rand_dict(user=user, boxname=boxname)
     return random_dict
@@ -54,10 +55,10 @@ def create_random_dict(
 def cr_box(
         access_token: Annotated[str, Depends(apikey_scheme)],
         box: BoxCreate
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     create_box(user=user, box=box)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.patch('/{new_boxname}')
@@ -65,17 +66,17 @@ def change_box(
         access_token: Annotated[str, Depends(apikey_scheme)],
         box: BoxCreate,
         new_boxname: str
-               ) -> Dict[str, str]:
+               ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     update_box(user=user, box=box, new_boxname=new_boxname)
-    return {'message': 'ок'}
+    return ResponseOk
 
 
 @router.delete('/{boxname}')
 def del_box(
         access_token: Annotated[str, Depends(apikey_scheme)],
         box: BoxCreate,
-        ) -> Dict[str, str]:
+        ) -> ResponseOk:
     user = get_user_by_token(access_token=access_token)
     delete_box(user=user, boxname=box.boxname)
-    return {'message': 'ок'}
+    return ResponseOk

@@ -29,7 +29,6 @@ class User(Base):
 
     tokens: Mapped['Token'] = relationship(back_populates='user')
     box: Mapped['Box'] = relationship(back_populates='creator')
-    userboxs: Mapped['UserBox'] = relationship(back_populates='user')
 
 
 class Token(Base):
@@ -48,7 +47,6 @@ class Box(Base):
     creator_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
 
     creator: Mapped['User'] = relationship(back_populates='box')
-    userboxs: Mapped['UserBox'] = relationship(back_populates='box')
 
 
 class UserBox(Base):
@@ -57,9 +55,6 @@ class UserBox(Base):
     box_id: Mapped[int] = mapped_column(ForeignKey('boxes.id'))
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     wishes: Mapped[str] = mapped_column(Text)
-    
-    user: Mapped['User'] = relationship(back_populates='userboxs')
-    box: Mapped['Box'] = relationship(back_populates='userboxs')
 
 
 class RandPresenter(Base):

@@ -52,3 +52,8 @@ class UserRead(UserBase):
 
 class Token(TunedModel):
     access_token: Annotated[str, Path(ge=1, lt=40)]
+
+
+class ResponseOk(TunedModel):
+    message: str = 'ok'
+    

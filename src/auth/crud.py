@@ -23,9 +23,9 @@ def reg_user(user_data: UserAuth) -> None:
             status_code=HTTP_400_BAD_REQUEST,
             detail='Пользователь с такой почтой уже существует'
         )
-    user = User(email=user_data.email, username=user_data.username, role_id=1,
-                is_active=True, is_superuser=False, is_verified=False)
-    user.hashed_password = Hasher.get_password_hash(user_data.password)
+    user = User(email=user_data.email, username=user_data.username,
+                hashed_password = Hasher.get_password_hash(user_data.password),
+                role_id=1, is_active=True, is_superuser=False, is_verified=False)
     db_session.add(user)
     db_session.commit()
     
