@@ -2,13 +2,13 @@ import uuid
 from fastapi import HTTPException
 
 from src.auth.schemas import UserCreate
-from src.models import Token, User
+from src.models import Token
 from src.auth.secure import Hasher
 from src.auth.dependencies import user_by_username, check_not_user
 from src.db import db_session
 
 
-def cr_token(user: UserCreate) -> None:
+def create_new_token(user: UserCreate) -> None:
     find_user = user_by_username(username=user.username)
     check_not_user(user=find_user)
     

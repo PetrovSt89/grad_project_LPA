@@ -5,7 +5,7 @@ from typing import Annotated, Dict
 from src.auth.schemas import UserCreate, UserAuth
 from src.auth.crud import reg_user, get_user_by_token
 from src.auth.secure import apikey_scheme
-from src.auth.tokens import cr_token
+from src.auth.tokens import create_new_token
 
 
 router = APIRouter(
@@ -22,7 +22,7 @@ def process_reg(user: UserAuth) -> Dict[str, str]:
 
 @router.post('/token', status_code=201)
 def create_token(user: UserCreate) -> Dict[str, str]:
-    cr_token(user=user)
+    create_new_token(user=user)
     return {'message': 'ок'}
 
 

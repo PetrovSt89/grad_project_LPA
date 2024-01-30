@@ -43,18 +43,18 @@ def reg_users_by_creator(
 def read_users_in_box(
         access_token: Annotated[str, Depends(apikey_scheme)],
         boxname: str
-          ) -> BoxRead:
+          ) -> BoxRead | None:
     user = get_user_by_token(access_token=access_token)
     box_with_wishes = get_box_with_wishes(user=user, boxname=boxname)
 
     return box_with_wishes
 
 
-@router.get('/reg-user/{boxname}', response_model = UserBox)
+@router.get('/recipient/{boxname}', response_model = UserBox)
 def read_user_recipient(
         access_token: Annotated[str, Depends(apikey_scheme)],
         boxname: str,
-          ) -> UserBox:
+          ) -> UserBox | None:
     user = get_user_by_token(access_token=access_token)
     recipient = get_user_recipient(user=user, boxname=boxname)
     return {'recipient': recipient}
@@ -79,6 +79,5 @@ def del_users_by_creator(
     user = get_user_by_token(access_token=access_token)
     delete_users_by_creator(user=user, boxname=boxname, username=username)
     return {'message': 'ок'}
-
 
 

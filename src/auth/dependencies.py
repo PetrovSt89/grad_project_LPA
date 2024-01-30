@@ -2,7 +2,7 @@ from fastapi import HTTPException
 
 from src.models import User
 
-def user_by_username(username) -> User:
+def user_by_username(username) -> User | None:
     return User.query.filter(User.username == username).first()
 
 

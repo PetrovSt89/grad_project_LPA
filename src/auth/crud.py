@@ -30,7 +30,7 @@ def reg_user(user_data: UserAuth) -> None:
     db_session.commit()
     
 
-def get_user_by_token(access_token: str):
+def get_user_by_token(access_token: str) -> User:
     token = db_session.scalar(select(Token).where(Token.access_token == access_token))
     if token:
         return token.user

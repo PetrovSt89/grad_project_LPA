@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from src.models import Box, User
 
 
-def box_by_name(boxname: str) -> Box:
+def box_by_name(boxname: str) -> Box | None:
     box = Box.query.filter(Box.boxname == boxname).first()
     if not box:
         raise HTTPException(

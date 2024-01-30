@@ -1,15 +1,14 @@
-from typing import List, Tuple
+from typing import Tuple
 
 from src.db import db_session
-from src.models import Box, UserBox, User
+from src.models import UserBox, User
 from src.auth.schemas import UserRead
 from src.auth.dependencies import user_by_username, check_not_user
 from src.box.schemas import BoxCreate, BoxRead
-from src.box.utils import read_json_dependence
 from src.box.crud import get_boxes, get_box_by_name
 from src.box.dependencies import box_by_name, check_creator
 from src.user_in_box.dependencies import userbox_by_user_by_box, check_userbox,\
-check_not_userbox, check_box_dependence
+check_not_userbox, rand_presenter_by_user_by_box, check_rand_presenter_box_dependence
 
 
 def reg_useer_in_box(box: BoxCreate, user: UserRead, wishes: str) -> None:
@@ -43,7 +42,7 @@ def reg_useer_by_creator(
 
 def get_useers_in_box(
         boxname: str
-        ) -> List[Tuple[UserRead, str]]:
+        ) -> list[Tuple[UserRead, str]] | None:
     
     box_input = box_by_name(boxname=boxname)    
     userbox_models = UserBox.query.filter(
@@ -59,7 +58,7 @@ def get_list_boxes_with_wishes(
         user: UserRead,
         skip: int = 0,
         limit: int = 100
-        ) -> List[BoxRead]:
+        ) -> list[BoxRead] | None:
     
     boxes = get_boxes(user=user, skip=skip, limit=limit)
 
@@ -74,7 +73,7 @@ def get_list_boxes_with_wishes(
 def get_box_with_wishes(
         user: UserRead,
         boxname: str,
-        ) -> BoxRead:
+        ) -> BoxRead | None:
     
     box = get_box_by_name(user=user, boxname=boxname)
 
@@ -88,8 +87,9 @@ def get_box_with_wishes(
 
 def get_user_recipient(user: UserRead, boxname: str) -> str:
     box_input = box_by_name(boxname=boxname)
-    box_dependence = read_json_dependence(filename=box_input.boxname)
-    return box_dependence[user.username]
+    box_dependence = rand_presenter_by_user_by_box(box=box_input, user=user).recipient
+
+    return box_dependence
 
 
 def delete_users_in_box(user: UserRead, boxname: str) -> None:
@@ -98,7 +98,7 @@ def delete_users_in_box(user: UserRead, boxname: str) -> None:
     
     check_not_userbox(userbox=userbox)
 
-    check_box_dependence(box=box_input, user=user)
+    check_rand_presenter_box_dependence(box=box_input, user=user)
 
     db_session.delete(userbox)
     db_session.commit()
@@ -112,7 +112,7 @@ def delete_users_by_creator(user: UserRead, boxname: str, username: str) -> None
     
     check_not_user(user=del_user)
     
-    check_box_dependence(box=box_input, user=del_user)
+    check_rand_presenter_box_dependence(box=box_input, user=del_user)
 
     userbox = userbox_by_user_by_box(user=del_user, box=box_input)
     
