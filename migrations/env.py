@@ -4,7 +4,7 @@ sys.path.append(os.path.join(sys.path[0], 'src'))
 # from src.operations.models import Base as Base_operations
 # from src.auth.models import Base as Base_auth
 # from src.operations.models import metadata as metadata_operations
-from src.auth.models import Base
+from src.models import Base
 
 
 from logging.config import fileConfig

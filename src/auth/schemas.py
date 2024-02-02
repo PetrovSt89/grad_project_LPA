@@ -1,7 +1,14 @@
-from pydantic import ConfigDict, BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
+from fastapi import Path
+
+from typing import Annotated
 
 
-class RoleBase(BaseModel):
+class TunedModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RoleBase(TunedModel):
     name: str
 
 
@@ -12,27 +19,41 @@ class RoleCreate(RoleBase):
 class Role(RoleBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
 
+class UserBase(TunedModel):
+    pass
+    
 
-class UserBase(BaseModel):
-    email: EmailStr
+class Creator(UserBase):
     username: str
+    id: int
+
+
+class UserAuth(UserBase):
+    username: str
+    password: str
+    email: EmailStr
 
 
 class UserCreate(UserBase):
+    username: str
     password: str
-
+    
 
 class UserRead(UserBase):
     id: int
-    role_id: Role
+    username: str
+    email: EmailStr
+    role_id: int
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
 
-    model_config = ConfigDict(from_attributes=True)
+
+class Token(TunedModel):
+    access_token: Annotated[str, Path(ge=1, lt=40)]
 
 
-class Token(BaseModel):
-    access_token: str
+class ResponseOk(TunedModel):
+    message: str = 'ok'
+    
